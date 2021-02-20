@@ -1,4 +1,3 @@
-import machine
 import network
 import time
 import json
@@ -46,6 +45,7 @@ emails = [
     {"subject": "hello!", "from": "Me <me@me.com>", "date": "2021-01-01 00:00:00 +11"},
     {"subject": "hi!", "from": "Them <them@them.com>", "date": "2020-12-12 00:00:00 +11"},
 ]
+old_emails = emails
 
 # Initialise our Inkplate object
 display = inkplate.Inkplate(inkplate.Inkplate.INKPLATE_1BIT)
@@ -67,41 +67,43 @@ TOTAL_HEIGHT = RECT_HEIGHT + BETWEEN_Y
 while True:
     do_connect()
     emails = http_get_json("http://" + secrets.proxy_ip + "/mail/" + secrets.secret_key)
-    try:
-        for email in emails:
-            top = OUTER_PADDING + i * TOTAL_HEIGHT
-            if top >= 600:
-                break
+    if emails != old_emails:
+        old_emails = emails
+        try:
+            for email in emails:
+                top = OUTER_PADDING + i * TOTAL_HEIGHT
+                if top >= 600:
+                    break
 
-            is_new = "Seen" not in email["flags"]
-            if is_new:
-                display.fillRect(OUTER_PADDING, OUTER_PADDING + i * TOTAL_HEIGHT, inkplate.D_COLS - OUTER_PADDING * 2, RECT_HEIGHT, display.BLACK)
-            else:
-                display.drawRect(OUTER_PADDING, OUTER_PADDING + i * TOTAL_HEIGHT, inkplate.D_COLS - OUTER_PADDING * 2, RECT_HEIGHT, display.BLACK)
-            from_name, from_email = email["from"].rsplit("<", 1)
-            from_email = from_email[:-1]
-            if from_name:
-                Writer.set_textpos(display.ipm, OUTER_PADDING + i * TOTAL_HEIGHT + INNER_PADDING, OUTER_PADDING + INNER_PADDING)
-                writer.printstring(from_name, invert=is_new)
-            Writer.set_textpos(display.ipm, OUTER_PADDING + i * TOTAL_HEIGHT + INNER_PADDING, inkplate.D_COLS - OUTER_PADDING - INNER_PADDING - writer.stringlen(from_email))
-            writer.printstring(from_email, invert=is_new)
+                is_new = "Seen" not in email["flags"]
+                if is_new:
+                    display.fillRect(OUTER_PADDING, OUTER_PADDING + i * TOTAL_HEIGHT, inkplate.D_COLS - OUTER_PADDING * 2, RECT_HEIGHT, display.BLACK)
+                else:
+                    display.drawRect(OUTER_PADDING, OUTER_PADDING + i * TOTAL_HEIGHT, inkplate.D_COLS - OUTER_PADDING * 2, RECT_HEIGHT, display.BLACK)
+                from_name, from_email = email["from"].rsplit("<", 1)
+                from_email = from_email[:-1]
+                if from_name:
+                    Writer.set_textpos(display.ipm, OUTER_PADDING + i * TOTAL_HEIGHT + INNER_PADDING, OUTER_PADDING + INNER_PADDING)
+                    writer.printstring(from_name, invert=is_new)
+                Writer.set_textpos(display.ipm, OUTER_PADDING + i * TOTAL_HEIGHT + INNER_PADDING, inkplate.D_COLS - OUTER_PADDING - INNER_PADDING - writer.stringlen(from_email))
+                writer.printstring(from_email, invert=is_new)
 
-            if "Flagged" in email["flags"]:
-                Writer.set_textpos(display.ipm, OUTER_PADDING + i * TOTAL_HEIGHT + INNER_PADDING + FONT_HEIGHT, OUTER_PADDING + INNER_PADDING)
-                writer.printstring("!!", invert=not is_new)
+                if "Flagged" in email["flags"]:
+                    Writer.set_textpos(display.ipm, OUTER_PADDING + i * TOTAL_HEIGHT + INNER_PADDING + FONT_HEIGHT, OUTER_PADDING + INNER_PADDING)
+                    writer.printstring("!!", invert=not is_new)
 
-            date = email["date"][:-6]
-            Writer.set_textpos(display.ipm, OUTER_PADDING + i * TOTAL_HEIGHT + INNER_PADDING + FONT_HEIGHT, inkplate.D_COLS - OUTER_PADDING - INNER_PADDING - writer.stringlen(date))
-            writer.printstring(date, invert=is_new)
+                date = email["date"][:-6]
+                Writer.set_textpos(display.ipm, OUTER_PADDING + i * TOTAL_HEIGHT + INNER_PADDING + FONT_HEIGHT, inkplate.D_COLS - OUTER_PADDING - INNER_PADDING - writer.stringlen(date))
+                writer.printstring(date, invert=is_new)
 
-            Writer.set_textpos(display.ipm, OUTER_PADDING + i * TOTAL_HEIGHT + INNER_PADDING + FONT_HEIGHT + FONT_HEIGHT, OUTER_PADDING + INNER_PADDING)
-            writer.printstring(email["subject"], invert=is_new)
+                Writer.set_textpos(display.ipm, OUTER_PADDING + i * TOTAL_HEIGHT + INNER_PADDING + FONT_HEIGHT + FONT_HEIGHT, OUTER_PADDING + INNER_PADDING)
+                writer.printstring(email["subject"], invert=is_new)
 
-            i += 1
-    except ValueError:
-        pass
+                i += 1
+        except ValueError:
+            pass
 
-    display.display()
+        display.display()
 
-    machine.deepsleep(300 * 1000)
+    time.sleep(300)
 
