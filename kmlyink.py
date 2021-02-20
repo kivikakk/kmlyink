@@ -67,7 +67,7 @@ while True:
     emails = http_get_json("http://" + secrets.proxy_ip + "/mail/" + secrets.secret_key)
     if emails != old_emails:
         old_emails = emails
-        display.fillScreen(display.WHITE)
+        display.fillRect(0, 0, inkplate.D_COLS, inkplate.D_ROWS, display.WHITE)
         try:
             for i, email in enumerate(emails):
                 top = OUTER_PADDING + i * TOTAL_HEIGHT
