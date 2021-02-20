@@ -73,21 +73,29 @@ while True:
             if top >= 600:
                 break
 
-            display.drawRect(OUTER_PADDING, OUTER_PADDING + i * TOTAL_HEIGHT, inkplate.D_COLS - OUTER_PADDING * 2, RECT_HEIGHT, display.BLACK)
+            is_new = "Seen" not in email["flags"]
+            if is_new:
+                display.fillRect(OUTER_PADDING, OUTER_PADDING + i * TOTAL_HEIGHT, inkplate.D_COLS - OUTER_PADDING * 2, RECT_HEIGHT, display.BLACK)
+            else:
+                display.drawRect(OUTER_PADDING, OUTER_PADDING + i * TOTAL_HEIGHT, inkplate.D_COLS - OUTER_PADDING * 2, RECT_HEIGHT, display.BLACK)
             from_name, from_email = email["from"].rsplit("<", 1)
             from_email = from_email[:-1]
             if from_name:
                 Writer.set_textpos(display.ipm, OUTER_PADDING + i * TOTAL_HEIGHT + INNER_PADDING, OUTER_PADDING + INNER_PADDING)
-                writer.printstring(from_name)
+                writer.printstring(from_name, invert=is_new)
             Writer.set_textpos(display.ipm, OUTER_PADDING + i * TOTAL_HEIGHT + INNER_PADDING, inkplate.D_COLS - OUTER_PADDING - INNER_PADDING - writer.stringlen(from_email))
-            writer.printstring(from_email)
+            writer.printstring(from_email, invert=is_new)
+
+            if "Flagged" in email["flags"]:
+                Writer.set_textpos(display.ipm, OUTER_PADDING + i * TOTAL_HEIGHT + INNER_PADDING + FONT_HEIGHT, OUTER_PADDING + INNER_PADDING)
+                writer.printstring("!!", invert=not is_new)
 
             date = email["date"][:-6]
             Writer.set_textpos(display.ipm, OUTER_PADDING + i * TOTAL_HEIGHT + INNER_PADDING + FONT_HEIGHT, inkplate.D_COLS - OUTER_PADDING - INNER_PADDING - writer.stringlen(date))
-            writer.printstring(date)
+            writer.printstring(date, invert=is_new)
 
             Writer.set_textpos(display.ipm, OUTER_PADDING + i * TOTAL_HEIGHT + INNER_PADDING + FONT_HEIGHT + FONT_HEIGHT, OUTER_PADDING + INNER_PADDING)
-            writer.printstring(email["subject"])
+            writer.printstring(email["subject"], invert=is_new)
 
             i += 1
     except ValueError:
