@@ -54,8 +54,6 @@ display.begin()
 writer = Writer(display.ipm, inputsanscompressedregular)
 writer.set_clip(True, True, False)
 
-i = 0
-
 OUTER_PADDING = 8
 INNER_PADDING = 4
 BETWEEN_Y = 5
@@ -70,7 +68,7 @@ while True:
     if emails != old_emails:
         old_emails = emails
         try:
-            for email in emails:
+            for i, email in enumerate(emails):
                 top = OUTER_PADDING + i * TOTAL_HEIGHT
                 if top >= 600:
                     break
@@ -98,8 +96,6 @@ while True:
 
                 Writer.set_textpos(display.ipm, OUTER_PADDING + i * TOTAL_HEIGHT + INNER_PADDING + FONT_HEIGHT + FONT_HEIGHT, OUTER_PADDING + INNER_PADDING)
                 writer.printstring(email["subject"], invert=is_new)
-
-                i += 1
         except ValueError:
             pass
 
